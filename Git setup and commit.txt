@@ -1,0 +1,16 @@
+Create github repository for godot project
+- Create github repository
+- Go to godot project file location in powershell
+- Run `git init`
+- Run `git remote add origin [github-https-url]`
+	- e.g. https://github.com/OliviaClark3/20-Questions.git 
+- Run `git add .`
+- Run `git commit -m "Initial commit"`
+- Run `git branch -M main`
+- Run `git push origin main`
+
+Push changes to github repo
+- Go to godot project file location in powershell
+- Run `git add .`
+- Run `git commit -m "Commit message"`
+- Run `git push`
