@@ -1,4 +1,3 @@
-```
 var ui_tweens := {}
 var ui_defaults := {}
 
@@ -70,4 +69,3 @@ func on_ui_unhover(control: Control):
 
 	tween.tween_property(control, "scale", default_scale, 0.2)
 	tween.parallel().tween_property(control, "rotation_degrees", default_rotation, 0.1)
-```
