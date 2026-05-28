@@ -1,0 +1,69 @@
+```
+var ui_tweens := {}
+var ui_defaults := {}
+
+func set_pivot_without_moving(control: Control, new_pivot: Vector2):
+	var old_pivot := control.pivot_offset
+	var visual_position := control.position + old_pivot * (Vector2.ONE - control.scale)
+
+	control.pivot_offset = new_pivot
+	control.position = visual_position - new_pivot * (Vector2.ONE - control.scale)
+
+
+func setup_ui_hover(control: Control):
+	if ui_defaults.has(control):
+		return
+
+	set_pivot_without_moving(control, control.size / 2.0)
+
+	ui_defaults[control] = {
+		"scale": control.scale,
+		"position": control.position
+	}
+
+
+func kill_ui_tween(control: Control):
+	if ui_tweens.has(control) and ui_tweens[control].is_running():
+		ui_tweens[control].kill()
+
+
+func on_ui_hover(control: Control, hover_amount := 1.15, rotation_amount := 5.0):
+	if control is BaseButton and control.disabled:
+		return
+
+	setup_ui_hover(control)
+
+	var default_scale: Vector2 = ui_defaults[control].scale
+	var default_position: Vector2 = ui_defaults[control].position
+	var hover_scale := default_scale * hover_amount
+	var rotation_target: float = rotation_amount * [-1.0, 1.0].pick_random()
+
+	kill_ui_tween(control)
+
+	var tween := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	ui_tweens[control] = tween
+
+	tween.tween_property(control, "position", default_position, 0.01)
+	tween.parallel().tween_property(control, "scale", hover_scale, 0.2)
+	tween.parallel().tween_property(control, "rotation_degrees", rotation_target, 0.1)
+	tween.parallel().tween_property(control, "rotation_degrees", 0.0, 0.1).set_delay(0.1)
+
+
+func on_ui_unhover(control: Control):
+	if control is BaseButton and control.disabled:
+		return
+
+	setup_ui_hover(control)
+
+	var default_scale: Vector2 = ui_defaults[control].scale
+	var default_position: Vector2 = ui_defaults[control].position
+
+	kill_ui_tween(control)
+
+	var tween := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	ui_tweens[control] = tween
+
+	tween.tween_property(control, "position", default_position, 0.2)
+	tween.parallel().tween_property(control, "scale", default_scale, 0.2)
+	tween.parallel().tween_property(control, "rotation_degrees", 0.0, 0.1)
+```
