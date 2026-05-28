@@ -3,11 +3,12 @@ var ui_tweens := {}
 var ui_defaults := {}
 
 func set_pivot_without_moving(control: Control, new_pivot: Vector2):
-	var old_pivot := control.pivot_offset
-	var visual_position := control.position + old_pivot * (Vector2.ONE - control.scale)
+	var visual_center_before := control.get_global_transform_with_canvas() * (control.size / 2.0)
 
 	control.pivot_offset = new_pivot
-	control.position = visual_position - new_pivot * (Vector2.ONE - control.scale)
+
+	var visual_center_after := control.get_global_transform_with_canvas() * (control.size / 2.0)
+	control.global_position += visual_center_before - visual_center_after
 
 
 func setup_ui_hover(control: Control):
@@ -18,7 +19,7 @@ func setup_ui_hover(control: Control):
 
 	ui_defaults[control] = {
 		"scale": control.scale,
-		"position": control.position
+		"rotation": control.rotation_degrees
 	}
 
 
@@ -34,19 +35,21 @@ func on_ui_hover(control: Control, hover_amount := 1.15, rotation_amount := 5.0)
 	setup_ui_hover(control)
 
 	var default_scale: Vector2 = ui_defaults[control].scale
-	var default_position: Vector2 = ui_defaults[control].position
+	var default_rotation: float = ui_defaults[control].rotation
+
 	var hover_scale := default_scale * hover_amount
-	var rotation_target: float = rotation_amount * [-1.0, 1.0].pick_random()
+	var rotation_target: float = default_rotation + rotation_amount * [-1.0, 1.0].pick_random()
 
 	kill_ui_tween(control)
 
-	var tween := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	var tween := create_tween()
+	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	ui_tweens[control] = tween
 
-	tween.tween_property(control, "position", default_position, 0.01)
-	tween.parallel().tween_property(control, "scale", hover_scale, 0.2)
+	tween.tween_property(control, "scale", hover_scale, 0.2)
 	tween.parallel().tween_property(control, "rotation_degrees", rotation_target, 0.1)
-	tween.parallel().tween_property(control, "rotation_degrees", 0.0, 0.1).set_delay(0.1)
+	tween.parallel().tween_property(control, "rotation_degrees", default_rotation, 0.1).set_delay(0.1)
 
 
 func on_ui_unhover(control: Control):
@@ -56,14 +59,15 @@ func on_ui_unhover(control: Control):
 	setup_ui_hover(control)
 
 	var default_scale: Vector2 = ui_defaults[control].scale
-	var default_position: Vector2 = ui_defaults[control].position
+	var default_rotation: float = ui_defaults[control].rotation
 
 	kill_ui_tween(control)
 
-	var tween := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	var tween := create_tween()
+	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	ui_tweens[control] = tween
 
-	tween.tween_property(control, "position", default_position, 0.2)
-	tween.parallel().tween_property(control, "scale", default_scale, 0.2)
-	tween.parallel().tween_property(control, "rotation_degrees", 0.0, 0.1)
+	tween.tween_property(control, "scale", default_scale, 0.2)
+	tween.parallel().tween_property(control, "rotation_degrees", default_rotation, 0.1)
 ```
